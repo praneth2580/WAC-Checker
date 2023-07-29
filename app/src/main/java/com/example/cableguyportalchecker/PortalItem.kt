@@ -30,7 +30,7 @@ import com.example.cableguyportalchecker.Util.Url.Ping
 class PortalItem {
 
     @Composable
-    fun PortalItems(domain: String, name: String, user: String, pass: String, context: Context) {
+    fun PortalItems(domain: String, name: String, user: String, pass: String, importance: Int, context: Context) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

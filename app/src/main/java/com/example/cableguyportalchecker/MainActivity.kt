@@ -35,6 +35,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.cableguyportalchecker.ui.theme.CableguyPortalCheckerTheme
+import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import org.json.JSONArray
 
 class MainActivity : ComponentActivity() {
@@ -57,7 +58,8 @@ class MainActivity : ComponentActivity() {
                                 IconButton(onClick = {
 
                                     val intent: Intent = csv.selectFile();
-                                    resultLauncher.launch(intent);
+                                    startActivityForResult(intent,csv.PICK_CSV_FILE)
+//                                    resultLauncher.launch(intent);
 
                                 }) {
                                     Image(
@@ -77,6 +79,13 @@ class MainActivity : ComponentActivity() {
                                     Image(
                                         painterResource(id = R.drawable.web_up),
                                         contentDescription = "Check if All Portals",
+                                        modifier = Modifier.size(30.dp)
+                                    )
+                                }
+                                IconButton(onClick = { /*TODO*/ }) {
+                                    Image(
+                                        painterResource(id = R.drawable.settings),
+                                        contentDescription = "Settings",
                                         modifier = Modifier.size(30.dp)
                                     )
                                 }
@@ -104,16 +113,31 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == csv.PICK_CSV_FILE && resultCode == Activity.RESULT_OK) {
+
+            data?.data?.also { uri ->
+                csv.readFile(uri)
+//                val contentResolver = applicationContext.contentResolver
+//                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+//                contentResolver.takePersistableUriPermission(uri, takeFlags)
+            }
+
+        }
+
+    }
 
     val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            Log.d(TAG, "onCreate: $result.data")
+            Log.d(TAG, "onCreate: ${result.data?.toURI()}")
             if (!csv.checkPermissionREAD_EXTERNAL_STORAGE()) {
                 Log.d(TAG, "READ_EXTERNAL_STORAGE: false")
-                requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),101);
+                requestPermissions(arrayOf(Manifest.permission_group.STORAGE),101);
             } else {
                 Log.d(TAG, "READ_EXTERNAL_STORAGE: true")
-                csv.readFile(Uri.parse(result.data?.toURI() ?: null))
+                csv.readFile(Uri.parse(result.data?.toURI()))
             }
         }
     }
@@ -124,8 +148,10 @@ class MainActivity : ComponentActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-//        if ()
-
+        Log.d(TAG, "onRequestPermissionsResult: " + requestCode + " " + grantResults)
+        if (requestCode == 101) {
+            resultLauncher.launch(intent);
+        }
     }
 }
 
@@ -135,7 +161,7 @@ fun Greeting(list: JSONArray, modifier: Modifier = Modifier, ctx: Context ) {
         modifier = modifier
     ) {
         items(10) {
-            PortalItem().PortalItems(domain = "https://www.google.com/", name = "Google", user = "A", pass = "B", context = ctx)
+            PortalItem().PortalItems(domain = "https://www.google.com/", name = "Google", user = "A", pass = "B",0, context = ctx)
         }
     }
 }
