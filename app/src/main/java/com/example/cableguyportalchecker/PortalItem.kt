@@ -60,7 +60,7 @@ class PortalItem {
                     text = name,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxHeight()
                 )

@@ -5,29 +5,19 @@ import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.database.Cursor
 import android.net.Uri
 import android.os.Build
 import android.util.Log
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import java.io.BufferedReader
-import java.io.File
 import java.io.InputStreamReader
 
 class CSV(private var ctx: Context) {
 
     public val PICK_CSV_FILE = 2;
+    private val _csv_import_headers = listOf<String>("frontend","backend","name","importance")
 
     fun selectFile(): Intent {
-
-//        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).also {
-////            addCategory
-//
-//            it.addCategory(Intent.CATEGORY_OPENABLE)
-//            it.type = "text/csv";
-//            it.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-//            it.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-//        }
 
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
@@ -38,29 +28,22 @@ class CSV(private var ctx: Context) {
         return intent
     }
 
-    fun readFile(uri: Uri) {
+    fun readFile(uri: Uri): List<List<String>> {
 
-//        val stringBuilder = StringBuilder()
+        var rows: List<List<String>> = listOf();
         var stringBuilder: String? = null;
         ctx.contentResolver.openInputStream(uri)?.use { inputStream ->
             BufferedReader(InputStreamReader(inputStream)).use { reader ->
                 stringBuilder = reader.readText()
-//                var line: String? = reader.readLine();
-//                Log.d(TAG, "readFile: " + line)
-//                while (line != null) {
-//                    stringBuilder.append("$line\\n")
-//                    line = reader.readLine()
-//                    Log.d(TAG, "readFile: " + line)
-//                }
             }
         }
 
         if (!stringBuilder.isNullOrEmpty()) {
-            Log.d(TAG, "readFile: " + stringBuilder)
-            val rows: List<List<String>> = csvReader().readAll(stringBuilder.toString())
-            println(rows)
+            rows = csvReader().readAll(stringBuilder.toString())
         }
+        if (validateCSV(rows[0])) return rows
 
+        return listOf()
     }
 
     fun checkPermissionREAD_EXTERNAL_STORAGE(): Boolean {
@@ -76,6 +59,29 @@ class CSV(private var ctx: Context) {
         }
 
         return hasPermission
+    }
+
+    fun validateCSV(headers: List<String>): Boolean {
+        var is_csv_valid: Boolean = false;
+        if (headers.size == _csv_import_headers.size) {
+            var index = 0
+            for (header in _csv_import_headers) {
+                if (header === headers[index]) {
+                    is_csv_valid = false
+                    break
+                }
+                index++
+            }
+
+        } else {
+            is_csv_valid = false
+            // condition for header are not complete CSV
+        }
+        return is_csv_valid
+    }
+
+    fun saveCSV(rows: List<List<String>>) {
+
     }
 
 }

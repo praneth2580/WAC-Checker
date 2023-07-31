@@ -119,7 +119,7 @@ class MainActivity : ComponentActivity() {
         if (requestCode == csv.PICK_CSV_FILE && resultCode == Activity.RESULT_OK) {
 
             data?.data?.also { uri ->
-                csv.readFile(uri)
+                val rows: List<List<String>> = csv.readFile(uri)
 //                val contentResolver = applicationContext.contentResolver
 //                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 //                contentResolver.takePersistableUriPermission(uri, takeFlags)
